@@ -1,0 +1,63 @@
+version: "3.8"
+
+services:
+  # --- Banco de Dados ---
+  mysql:
+    image: mysql:8.0
+    container_name: akeneo_db
+    environment:
+      MYSQL_ROOT_PASSWORD: akeneo_root
+      MYSQL_USER: akeneo
+      MYSQL_PASSWORD: akeneo
+      MYSQL_DATABASE: akeneo_pim
+    volumes:
+      - akeneo_mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # --- Motor de Busca (Essencial) ---
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.5.1
+    container_name: akeneo_es
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m" # Limita memória para não travar seu servidor
+    volumes:
+      - akeneo_elastic_data:/usr/share/elasticsearch/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9200"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # --- Akeneo PIM (Aplicação) ---
+  pim:
+    # Usamos a imagem DEV oficial pois ela já vem com dependências instaladas, facilitando o teste
+    image: akeneo/pim-php-dev:7.0
+    container_name: akeneo_app
+    environment:
+      APP_ENV: prod
+      APP_DEBUG: 0
+      APP_DATABASE_HOST: mysql
+      APP_DATABASE_USER: akeneo
+      APP_DATABASE_PASSWORD: akeneo
+      APP_DATABASE_NAME: akeneo_pim
+      APP_ELASTICSEARCH_HOST: elasticsearch
+    ports:
+      - "8080:80"
+    depends_on:
+      mysql:
+        condition: service_healthy
+      elasticsearch:
+        condition: service_healthy
+    volumes:
+      - akeneo_uploads:/srv/pim/public/storage
+
+volumes:
+  akeneo_mysql_data:
+  akeneo_elastic_data:
+  akeneo_uploads:
