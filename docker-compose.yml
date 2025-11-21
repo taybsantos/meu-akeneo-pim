@@ -23,7 +23,7 @@ services:
   pim:
     image: akeneo/pim-php-dev:8.1
     container_name: akeneo_app
-    command: ["/bin/sh", "-c", "chown -R www-data:www-data /srv/pim && /usr/sbin/apache2ctl -D FOREGROUND"]
+    command: ["tail", "-f", "/dev/null"]
     environment:
       APP_ENV: prod
       APP_DEBUG: 0
