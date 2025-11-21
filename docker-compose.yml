@@ -1,7 +1,7 @@
-version: "3.8"
+version: '3.8'
 
 services:
-  # --- Banco de Dados (Local) ---
+  # --- Banco de Dados ---
   mysql:
     image: mysql:8.0
     container_name: akeneo_db
@@ -17,13 +17,12 @@ services:
       interval: 5s
       timeout: 5s
       retries: 10
+    restart: unless-stopped
 
   # --- Akeneo PIM (Aplicação) ---
   pim:
-    # Usamos a imagem com PHP 8.1 que é a base para o Akeneo 7
     image: akeneo/pim-php-dev:8.1
     container_name: akeneo_app
-    #command: ["tail", "-f", "/dev/null"]
     environment:
       APP_ENV: prod
       APP_DEBUG: 0
@@ -31,7 +30,7 @@ services:
       APP_DATABASE_USER: akeneo
       APP_DATABASE_PASSWORD: akeneo
       APP_DATABASE_NAME: akeneo_pim
-      # IMPORTANTE: Coloque o IP do seu servidor Elastic abaixo
+      # Seu ElasticSearch (Confirme se o IP mudou, se for estático mantenha)
       APP_ELASTICSEARCH_HOST: "69.62.100.94"
       APP_ELASTICSEARCH_PORT: "9200"
     ports:
@@ -42,6 +41,9 @@ services:
     volumes:
       - akeneo_uploads:/srv/pim/public/storage
       - akeneo_code:/srv/pim
+    # REMOVIDO: O comando 'command: tail...' não existe mais aqui.
+    # O container vai usar o comando padrão da imagem (Iniciar Apache)
+    restart: unless-stopped
 
 volumes:
   akeneo_mysql_data:
