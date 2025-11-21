@@ -23,6 +23,7 @@ services:
     # Usamos a imagem com PHP 8.1 que é a base para o Akeneo 7
     image: akeneo/pim-php-dev:8.1
     container_name: akeneo_app
+    command: ["tail", "-f", "/dev/null"]
     environment:
       APP_ENV: prod
       APP_DEBUG: 0
@@ -40,7 +41,9 @@ services:
         condition: service_healthy
     volumes:
       - akeneo_uploads:/srv/pim/public/storage
+      - akeneo_code:/srv/pim
 
 volumes:
   akeneo_mysql_data:
   akeneo_uploads:
+  akeneo_code:
