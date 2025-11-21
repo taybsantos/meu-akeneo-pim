@@ -23,7 +23,7 @@ services:
     # Usamos a imagem com PHP 8.1 que é a base para o Akeneo 7
     image: akeneo/pim-php-dev:8.1
     container_name: akeneo_app
-    #command: ["tail", "-f", "/dev/null"]
+    command: ["tail", "-f", "/dev/null"]
     environment:
       APP_ENV: prod
       APP_DEBUG: 0
