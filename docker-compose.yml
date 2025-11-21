@@ -34,7 +34,8 @@ services:
       APP_ELASTICSEARCH_HOST: "69.62.100.94"
       APP_ELASTICSEARCH_PORT: "9200"
     ports:
-      - "8080:80"
+      - "8085:8080"
+      - "85:80"
     depends_on:
       mysql:
         condition: service_healthy
