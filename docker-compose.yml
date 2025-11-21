@@ -4,51 +4,43 @@ services:
   # --- Banco de Dados (Local) ---
   mysql:
     image: mysql:8.0
-    version: "3.8"
-
-    services:
-      # --- Banco de Dados (Local) ---
-      mysql:
-        image: mysql:8.0
-        container_name: akeneo_db
-        environment:
-          MYSQL_ROOT_PASSWORD: akeneo_root
-          MYSQL_USER: akeneo
-          MYSQL_PASSWORD: akeneo
-          MYSQL_DATABASE: akeneo_pim
-        volumes:
-          - akeneo_mysql_data:/var/lib/mysql
-        healthcheck:
-          test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
-          interval: 5s
-          timeout: 5s
-          retries: 10
-
-      # --- Akeneo PIM v7 (Aplicação) ---
-      pim:
-        # ATENÇÃO: Usamos a tag 8.1 que corresponde ao ambiente da Akeneo 7
-        image: akeneo/pim-php-dev:8.1
-        container_name: akeneo_app
-        environment:
-          APP_ENV: prod
-          APP_DEBUG: 0
-          APP_DATABASE_HOST: mysql
-          APP_DATABASE_USER: akeneo
-          APP_DATABASE_PASSWORD: akeneo
-          APP_DATABASE_NAME: akeneo_pim
-          # Seu Elastic Stack Externo
-          APP_ELASTICSEARCH_HOST: "IP_DO_SEU_ELASTICSEARCH"
-          APP_ELASTICSEARCH_PORT: "9200"
-        ports:
-          - "8080:80"
-        depends_on:
-          mysql:
-            condition: service_healthy
-        volumes:
-          - akeneo_code:/srv/pim # Volume para persistir o código que vamos baixar
-          - akeneo_uploads:/srv/pim/public/storage # Volume para fotos
-
+    container_name: akeneo_db
+    environment:
+      MYSQL_ROOT_PASSWORD: akeneo_root
+      MYSQL_USER: akeneo
+      MYSQL_PASSWORD: akeneo
+      MYSQL_DATABASE: akeneo_pim
     volumes:
-      akeneo_mysql_data:
-      akeneo_code:
-      akeneo_uploads:
+      - akeneo_mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # --- Akeneo PIM (Aplicação) ---
+  pim:
+    # Usamos a imagem com PHP 8.1 que é a base para o Akeneo 7
+    image: akeneo/pim-php-dev:8.1
+    container_name: akeneo_app
+    environment:
+      APP_ENV: prod
+      APP_DEBUG: 0
+      APP_DATABASE_HOST: mysql
+      APP_DATABASE_USER: akeneo
+      APP_DATABASE_PASSWORD: akeneo
+      APP_DATABASE_NAME: akeneo_pim
+      # IMPORTANTE: Coloque o IP do seu servidor Elastic abaixo
+      APP_ELASTICSEARCH_HOST: "69.62.100.94"
+      APP_ELASTICSEARCH_PORT: "9200"
+    ports:
+      - "8080:80"
+    depends_on:
+      mysql:
+        condition: service_healthy
+    volumes:
+      - akeneo_uploads:/srv/pim/public/storage
+
+volumes:
+  akeneo_mysql_data:
+  akeneo_uploads:
